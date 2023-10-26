@@ -1,11 +1,28 @@
 import pandas as pd
+import math
+
+def calcCost(X, Y, theta0, theta1):
+    sum = 0
+    for i in range(len(Y)):
+        x = X[i]
+        y = Y[i]
+        prediction = predict(x, theta0, theta1)
+        sum += (prediction - y) ** 2
+
+    cost = sum / (2 * len(Y))
+    return cost
 
 def predict(mileage, theta0, theta1):
     return theta0 + (theta1 * mileage)
 
-def fit(X, Y, theta0, theta1, learningRate, nbIteration):
+def fit(X, Y, theta0, theta1, learningRate, epochs):
     m = X.shape[0]
-    for _ in range(nbIteration):
+    cost = 0
+    for i in range(epochs):
+        if i % 50000 == 0:
+            print(f"Epochs: ${i}")
+            print(f"Cost: ${cost}")
+        cost = calcCost(X, Y, theta0, theta1)
         theta0, theta1 = gradientDescent(m, X, Y, theta0, theta1, learningRate)
         
     return theta0, theta1
@@ -41,20 +58,26 @@ def getThetasFromCsv(filename):
     data = pd.read_csv(filename)
     
     try:
-        if (data.theta0.__len__() != 1 or data.theta1.__len__() != 1):
+        if (data.theta0.__len__() != 1 or data.theta1.__len__() != 1
+            or math.isnan(data.theta0[0]) or math.isnan(data.theta1[0])):
             raise Exception()
-        return data.theta0[0], data.theta1[0]
+        return float(data.theta0[0]), float(data.theta1[0])
     except Exception:
         print("Don't change the format of the csv file.")
         exit(1)
         
 def getDatasetFromCsv(filename):
-    data = pd.read_csv(filename)
-    
     try:
-        if (data.km.__len__() <= 10 or data.price.__len__() <= 10):
+        data = pd.read_csv(filename)   
+            
+        if (data.km.__len__() <= 0 and data.price.__len__() <= 0):
             raise Exception
+        
+        for km in data.km:
+            int(km)
+        for price in data.price:
+            int(price)
         return data.km / 1000, data.price / 1000
-    except Exception:
+    except:
         print("Don't change the format of the csv file.")
         exit(1)     
