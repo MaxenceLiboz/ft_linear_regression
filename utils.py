@@ -1,28 +1,31 @@
-import csv
-import numpy as np
+import pandas as pd
 
 def predict(mileage, theta0, theta1):
     return theta0 + (theta1 * mileage)
 
-def fit(trainX, trainY, theta0, theta1, learningRate, nbIteration):
-    m = trainX.shape[0]
-    thetaTmp0 = 0
-    thetaTmp1 = 0
+def fit(X, Y, theta0, theta1, learningRate, nbIteration):
+    m = X.shape[0]
     for _ in range(nbIteration):
-        for i in range(m):
-            prediction = predict(trainX[i], theta0, theta1)
-            thetaTmp0 += prediction - trainY[i]
-            thetaTmp1 += prediction * trainX[i]
+        theta0, theta1 = gradientDescent(m, X, Y, theta0, theta1, learningRate)
         
-        thetaTmp0 = learningRate * (thetaTmp0 / m)
-        thetaTmp1 = learningRate * (thetaTmp1 / m)
-        
-        theta0 = theta0 - thetaTmp0
-        theta1 = theta1 - thetaTmp1
-    
     return theta0, theta1
 
-def get_mileage_from_user():
+def gradientDescent(m, X, Y, theta0, theta1, learningRate):
+    gradientTheta0 = 0
+    gradientTheta1 = 0
+    for i in range(m):
+        prediction = predict(X[i], theta0, theta1)
+        gradientTheta0 += prediction - Y[i]
+        gradientTheta1 += (prediction - Y[i]) * X[i]
+        
+    gradientTheta0 = learningRate * (gradientTheta0 / m)
+    gradientTheta1 = learningRate * (gradientTheta1 / m)
+    
+    theta0 = theta0 - gradientTheta0
+    theta1 = theta1 - gradientTheta1
+    return theta0, theta1
+
+def getMileageFromUser():
     mileage = input("Please enter the mileage of the car: ")
     try:
         mileage = int(mileage)
@@ -34,69 +37,24 @@ def get_mileage_from_user():
         print("Please enter a positive number for mileage")
         exit(1)
 
-def get_thetas_from_csv(filename):
+def getThetasFromCsv(filename):
+    data = pd.read_csv(filename)
+    
     try:
-        file = open(filename)
-        csvreader = csv.reader(file)
-
-        headers = []
-        thetas = []
-
-        headers = next(csvreader)
-        if (headers.__len__ != 2 or headers[0] != "theta0" or headers[1] != "theta1"):
-            raise Exception("Ne changez pas le format du fichier thetas.csv")
-
-        for row in csvreader:
-            if (row.__len__() != 2):
-                raise Exception("Ne changez pas le format du fichier thetas.csv")
-            thetas.append(row[0])
-            thetas.append(row[1])
-            break
-
-
-        theta0 = int(thetas[0])
-        theta1 = int(thetas[1])
-        if (theta0 < 0 or theta1 < 0):
-            raise ValueError()
-
-        file.close()
-        return theta0, theta1
-    except ValueError:
-        print("Les thetas doivent être des nombres positifs")
-        exit(1)
-    except Exception as exc:
-        print(exc)
+        if (data.theta0.__len__() != 1 or data.theta1.__len__() != 1):
+            raise Exception()
+        return data.theta0[0], data.theta1[0]
+    except Exception:
+        print("Don't change the format of the csv file.")
         exit(1)
         
-def get_data_from_csv(filename):
+def getDatasetFromCsv(filename):
+    data = pd.read_csv(filename)
+    
     try:
-        file = open(filename)
-        csvreader = csv.reader(file)
-
-        headers = []
-        trainXTmp = []
-        trainYTmp = []
-
-
-        headers = next(csvreader)
-        if (headers.__len__() != 2 or headers[0] != "km" or headers[1] != "price"):
-            raise Exception("Ne changez pas le format du fichier data.csv")
-        
-        for row in csvreader:
-            if (row.__len__() != 2):
-                raise Exception("Ne changez pas le format du fichier data.csv")
-            trainXTmp.append(int(row[0]) / 1000)
-            trainYTmp.append(int(row[1]) / 1000)
-
-        file.close()
-        
-        trainX = np.array(trainXTmp)
-        trainY = np.array(trainYTmp)
-        return trainX, trainY
-        
-    except ValueError:
-        print("Les thetas doivent être des nombres positifs")
-        exit(1)
-    except Exception as exc:
-        print(exc)
+        if (data.km.__len__() <= 10 or data.price.__len__() <= 10):
+            raise Exception
+        return data.km / 1000, data.price / 1000
+    except Exception:
+        print("Don't change the format of the csv file.")
         exit(1)     
