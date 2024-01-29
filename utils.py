@@ -1,5 +1,7 @@
 import pandas as pd
 import math
+import matplotlib.pyplot as plt
+
 
 def calcCost(X, Y, theta0, theta1):
     sum = 0
@@ -13,7 +15,7 @@ def calcCost(X, Y, theta0, theta1):
     return cost
 
 def predict(mileage, theta0, theta1):
-    return theta0 + (theta1 * mileage)
+    return (theta0 + (theta1 * mileage))
 
 def fit(X, Y, theta0, theta1, learningRate, epochs):
     m = X.shape[0]
@@ -22,6 +24,7 @@ def fit(X, Y, theta0, theta1, learningRate, epochs):
         if i % 50000 == 0:
             print(f"Epochs: ${i}")
             print(f"Cost: ${cost}")
+            plt.plot(list(range(250)), [predict(x, theta0, theta1) for x in range(250)])
         cost = calcCost(X, Y, theta0, theta1)
         theta0, theta1 = gradientDescent(m, X, Y, theta0, theta1, learningRate)
         
@@ -65,7 +68,8 @@ def getThetasFromCsv(filename):
     except Exception:
         print("Don't change the format of the csv file.")
         exit(1)
-        
+
+
 def getDatasetFromCsv(filename):
     try:
         data = pd.read_csv(filename)   
@@ -78,6 +82,6 @@ def getDatasetFromCsv(filename):
         for price in data.price:
             int(price)
         return data.km / 1000, data.price / 1000
-    except:
+    except Exception as e:
         print("Don't change the format of the csv file.")
         exit(1)     
