@@ -1,8 +1,7 @@
 import pandas as pd
 import math
-import matplotlib.pyplot as plt
 
-
+# The cost function used here is the Mean Squared Error
 def calcCost(X, Y, theta0, theta1):
     sum = 0
     for i in range(len(Y)):
@@ -22,9 +21,8 @@ def fit(X, Y, theta0, theta1, learningRate, epochs):
     cost = 0
     for i in range(epochs):
         if i % 50000 == 0:
-            print(f"Epochs: ${i}")
-            print(f"Cost: ${cost}")
-            plt.plot(list(range(250)), [predict(x, theta0, theta1) for x in range(250)])
+            print(f"Epochs: {i} / {epochs}")
+            print(f"Cost: {cost}")
         cost = calcCost(X, Y, theta0, theta1)
         theta0, theta1 = gradientDescent(m, X, Y, theta0, theta1, learningRate)
         
@@ -37,25 +35,25 @@ def gradientDescent(m, X, Y, theta0, theta1, learningRate):
         prediction = predict(X[i], theta0, theta1)
         gradientTheta0 += prediction - Y[i]
         gradientTheta1 += (prediction - Y[i]) * X[i]
-        
-    gradientTheta0 = learningRate * (gradientTheta0 / m)
-    gradientTheta1 = learningRate * (gradientTheta1 / m)
+    
+    gradientTheta0 = learningRate * gradientTheta0 / m
+    gradientTheta1 = learningRate * gradientTheta1 / m
     
     theta0 = theta0 - gradientTheta0
     theta1 = theta1 - gradientTheta1
     return theta0, theta1
 
 def getMileageFromUser():
-    mileage = input("Please enter the mileage of the car: ")
-    try:
-        mileage = int(mileage)
-        if (mileage < 0):
-            raise ValueError() 
-        print(f"The mileage input is: {mileage}")
-        return mileage
-    except ValueError as exc:
-        print("Please enter a positive number for mileage")
-        exit(1)
+    while True:
+        mileage = input("Please enter the mileage of the car: ")
+        try:
+            mileage = int(mileage)
+            if mileage < 0:
+                raise ValueError("Mileage must be a non-negative number.")
+            print(f"The mileage input is: {mileage}")
+            return mileage
+        except ValueError as exc:
+            print("Please enter a positive number for mileage")
 
 def getThetasFromCsv(filename):
     data = pd.read_csv(filename)
